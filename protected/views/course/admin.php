@@ -1,6 +1,6 @@
 <?php
-/* @var $this UserController */
-/* @var $model User */
+/* @var $this CourseController */
+/* @var $model Course */
 
 
 
@@ -10,7 +10,7 @@ $('.search-button').click(function(){
 	return false;
 });
 $('.search-form form').submit(function(){
-	$('#user-grid').yiiGridView('update', {
+	$('#course-grid').yiiGridView('update', {
 		data: $(this).serialize()
 	});
 	return false;
@@ -18,7 +18,7 @@ $('.search-form form').submit(function(){
 ");
 ?>
 
-<h1>Manage Users</h1>
+<h1>Manage Courses</h1>
 
 <p>
 You may optionally enter a comparison operator (<b>&lt;</b>, <b>&lt;=</b>, <b>&gt;</b>, <b>&gt;=</b>, <b>&lt;&gt;</b>
@@ -34,18 +34,16 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 
 <?php $this->widget('bootstrap.widgets.TbGridView', array(
 	'type'=>'striped bordered condensed',
-	'id'=>'user-grid',
+	'id'=>'course-grid',
 	'dataProvider'=>$model->search(),
 	'filter'=>$model,
 	'columns'=>array(
 		'name',
-		'username',
-		'password',
-		'email',		
-		'cpf',
-		'birth_date',
-		'phone',
-		
+		'schedule',
+		'paid',
+		'notebook',
+		'tbl_user_id',
+		'userName',
 		array(
 			'class'=>'bootstrap.widgets.TbButtonColumn',
   			'htmlOptions'=>array('style'=>'width: 50px'),

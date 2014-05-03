@@ -16,18 +16,33 @@
 
 <?php $this->widget('bootstrap.widgets.TbNavbar',array(
     'type'=>'inverse',
-    'collapse'=>true,
+    'collapse'=>true,    
     'items'=>array(
+
         array(
             'class'=>'bootstrap.widgets.TbMenu',
             'items'=>array(
-                array('label'=>'Home', 'url'=>array('/')),				
+                array('label'=>'Home', 'url'=>array('/')),
+                array('label'=>'Usuário', 'url'=>'#', 'items'=>array(
+                    array('label'=>'Cadastrar', 'url'=>array('/user/create')),
+                    array('label'=>'Administrar', 'url'=>array('/user/admin')),
+                    array('label'=>'Meus Detalhes', 'url'=>array('/user/userdetail')),
+                    )),
+                array('label'=>'Curso', 'url'=>'#', 'items'=>array(
+                    array('label'=>'Inscrever', 'url'=>array('/course/createuser')),
+                    array('label'=>'Administrar', 'url'=>array('/course/admin')),
+                    array('label'=>'Meus Detalhes', 'url'=>array('/course/coursedetail')),
+                    )),
+                array('label'=>'Ambiente Virtual','url'=>'http://py4noobs.commsystem.net/moodle/',),						
                 array('label'=>'Login', 'url'=>array('/site/login'), 'visible'=>Yii::app()->user->isGuest),
                 array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
             ),
         ),
     ),
-)); ?>
+)); 
+
+?>
+
 <!--
 Se eu não colocar a class container aqui o foot e meu content ficam na página toda quando eu quiser usar só um pedaço dá
 página adiciono apenas dentro do html dele, invés de aplicar a todas as coisas

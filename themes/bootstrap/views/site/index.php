@@ -7,7 +7,7 @@ $this->pageTitle=Yii::app()->name;
 <?php $this->beginWidget('bootstrap.widgets.TbHeroUnit',array(
     'heading'=>' Bem-Vindo'.CHtml::encode(''),
 )); ?>
-<h1>PythonForNoobs</h1>
+<h1>Py4Noobs</h1>
 <br>
 <p>Aprenda Python na prática</p>
 <?php $this->endWidget(); ?>

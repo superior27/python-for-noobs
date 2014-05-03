@@ -1,6 +1,6 @@
 <?php
 
-class UserController extends Controller
+class CourseController extends Controller
 {
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
@@ -32,13 +32,12 @@ class UserController extends Controller
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','userdetail',),
+				'actions'=>array('coursedetail','createuser'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'roles'=>array('admin',),
-				'actions'=>array('admin','delete','view','update','assign',),
-				
+				'actions'=>array('admin','delete','view','create','update',),				
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -61,102 +60,43 @@ class UserController extends Controller
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
 	 */
-
-
-	protected function validaCPF($cpf) {
- 
-    // Verifica se um número foi informado
-    if(empty($cpf)) {
-        return false;
-    }
- 
-    // Elimina possivel mascara
-    $cpf = ereg_replace('[^0-9]', '', $cpf);
-    $cpf = str_pad($cpf, 11, '0', STR_PAD_LEFT);
-     
-    // Verifica se o numero de digitos informados é igual a 11 
-    if (strlen($cpf) != 11) {
-        return false;
-    }
-    // Verifica se nenhuma das sequências invalidas abaixo 
-    // foi digitada. Caso afirmativo, retorna falso
-    else if ($cpf == '00000000000' || 
-        $cpf == '11111111111' || 
-        $cpf == '22222222222' || 
-        $cpf == '33333333333' || 
-        $cpf == '44444444444' || 
-        $cpf == '55555555555' || 
-        $cpf == '66666666666' || 
-        $cpf == '77777777777' || 
-        $cpf == '88888888888' || 
-        $cpf == '99999999999') {
-        return false;
-     // Calcula os digitos verificadores para verificar se o
-     // CPF é válido
-     } else {   
-         
-        for ($t = 9; $t < 11; $t++) {
-             
-            for ($d = 0, $c = 0; $c < $t; $c++) {
-                $d += $cpf{$c} * (($t + 1) - $c);
-            }
-            $d = ((10 * $d) % 11) % 10;
-            if ($cpf{$c} != $d) {
-                return false;
-            }
-        }
- 
-        return true;
-    }
-}
-
-	public function actionUserDetail(){
-			$tbl_user_id = Yii::app()->user->id;
-			if($tbl_user_id){
-				
-					$this->actionViewUser($tbl_user_id);		
-				
-			}
-			else{
-				$this->redirect(array('user/create'));
-			}
-
-
-		}
-
-
-	public function actionViewUser($id)
-	{
-		$this->render('view_user',array(
-			'model'=>$this->loadModel($id),
-		));
-	}
-
-
 	public function actionCreate()
 	{
-		$model=new User;
-
+		$model=new Course;
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['User']))
+		if(isset($_POST['Course']))
 		{
-			$model->attributes=$_POST['User'];
-			//Ao utilizar uma função do mesmo local
-			//Utilizar o $this
-			if(($this->validaCPF($model->cpf)) === true){
-				if($model->save())
-				{
-					$this->redirect(array('view','id'=>$model->id));
-				}
-			}
-			
-			
+			$model->attributes=$_POST['Course'];
+			$model->tbl_user_id = Yii::app()->user->id;
+			if($model->save())
+				$this->redirect(array('view','id'=>$model->id));
 		}
 
 		$this->render('create',array(
+			'model'=>$model,
+		));
+	}
+
+	public function actionCreateUser()
+	{
+		$model=new Course;
+
+		// Uncomment the following line if AJAX validation is needed
+		// $this->performAjaxValidation($model);
+
+		if(isset($_POST['Course']))
+		{
+			$model->attributes=$_POST['Course'];
+			$model->tbl_user_id = Yii::app()->user->id;
+			$model->paid = 0;
+			if($model->save())
+				$this->redirect(array('view','id'=>$model->id));
+		}
+
+		$this->render('create_user',array(
 			'model'=>$model,
 		));
 	}
@@ -173,9 +113,9 @@ class UserController extends Controller
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['User']))
+		if(isset($_POST['Course']))
 		{
-			$model->attributes=$_POST['User'];
+			$model->attributes=$_POST['Course'];
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
@@ -204,8 +144,7 @@ class UserController extends Controller
 	 */
 	public function actionIndex()
 	{
-		//Yii::app()->authManager->createRole("admin");
-		$dataProvider=new CActiveDataProvider('User');
+		$dataProvider=new CActiveDataProvider('Course');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
 		));
@@ -216,40 +155,47 @@ class UserController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new User('search');
+		$model=new Course('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['User']))
-			$model->attributes=$_GET['User'];
+		if(isset($_GET['Course']))
+			$model->attributes=$_GET['Course'];
 
 		$this->render('admin',array(
 			'model'=>$model,
 		));
 	}
 
-	public function actionAssign($id)
-	{
-		if(Yii::app()->authManager->checkAccess($_GET["item"],$id))
-		{
-			Yii::app()->authManager->revoke($_GET["item"],$id);
+	public function actionCourseDetail(){
+		$tbl_user_id = Yii::app()->user->id;
+		if($tbl_user_id){
+			$course = Course::model()->find('tbl_user_id=:tbl_user_id',
+				array(
+					':tbl_user_id'=>$tbl_user_id,
+					));
+			if($course){
+				$this->actionView($course->id);
+			}
+			else{
+			$this->redirect(array('course/create'));
+			}
 		}
-		else
-		{
-			Yii::app()->authManager->assign($_GET["item"],$id);
+		else{
+			$this->redirect(array('course/create'));
 		}
-		$this->redirect(array("view","id"=>$id));
-	}
 
+
+	}
 
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
 	 * If the data model is not found, an HTTP exception will be raised.
 	 * @param integer $id the ID of the model to be loaded
-	 * @return User the loaded model
+	 * @return Course the loaded model
 	 * @throws CHttpException
 	 */
 	public function loadModel($id)
 	{
-		$model=User::model()->findByPk($id);
+		$model=Course::model()->findByPk($id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
@@ -257,16 +203,14 @@ class UserController extends Controller
 
 	/**
 	 * Performs the AJAX validation.
-	 * @param User $model the model to be validated
+	 * @param Course $model the model to be validated
 	 */
 	protected function performAjaxValidation($model)
 	{
-		if(isset($_POST['ajax']) && $_POST['ajax']==='user-form')
+		if(isset($_POST['ajax']) && $_POST['ajax']==='course-form')
 		{
 			echo CActiveForm::validate($model);
 			Yii::app()->end();
 		}
 	}
-
-	
 }

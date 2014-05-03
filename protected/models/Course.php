@@ -1,26 +1,42 @@
 <?php
 
 /**
- * This is the model class for table "tbl_user".
+ * This is the model class for table "course".
  *
- * The followings are the available columns in table 'tbl_user':
+ * The followings are the available columns in table 'course':
  * @property integer $id
- * @property string $username
- * @property string $password
- * @property string $email
  * @property string $name
- * @property string $cpf
- * @property string $phone
- * @property string $birth_date
+ * @property string $schedule
+ * @property integer $paid
+ * @property string $notebook
+ * @property integer $tbl_user_id
+ *
+ * The followings are the available model relations:
+ * @property TblUser $tblUser
  */
-class User extends CActiveRecord
+class Course extends CActiveRecord
 {
 	/**
 	 * @return string the associated database table name
 	 */
+
+	public $userName;
+
+	public function afterFind(){
+		if(!empty($this->tblUser)){
+			
+				$this->userName=$this->tblUser->name;
+
+			
+
+		}
+
+	}
+
+
 	public function tableName()
 	{
-		return 'tbl_user';
+		return 'course';
 	}
 
 	/**
@@ -31,12 +47,13 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('username, password, email, name, cpf, birth_date', 'required'),
-			array('username, password, email', 'length', 'max'=>128),
-			array('name, cpf, phone', 'length', 'max'=>255),
+			array('name, schedule, paid, tbl_user_id', 'required'),
+			array('paid, tbl_user_id', 'numerical', 'integerOnly'=>true),
+			array('name, schedule', 'length', 'max'=>255),
+			array('notebook', 'length', 'max'=>45),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('id, username, password, email, name, cpf, phone, birth_date', 'safe', 'on'=>'search'),
+			array('id, name, schedule, paid, notebook, tbl_user_id', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -48,6 +65,7 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			'tblUser' => array(self::BELONGS_TO, 'User', 'tbl_user_id'),
 		);
 	}
 
@@ -58,13 +76,12 @@ class User extends CActiveRecord
 	{
 		return array(
 			'id' => 'ID',
-			'username' => 'Usuário',
-			'password' => 'Senha',
-			'email' => 'Email',
-			'name' => 'Nome',
-			'cpf' => 'CPF',
-			'phone' => 'Telefone',
-			'birth_date' => 'Data de Nascimento',
+			'name' => 'Nome do Curso',
+			'schedule' => 'Horário',
+			'paid' => 'Pago',
+			'notebook' => 'Notebook',
+			'tbl_user_id' => 'ID do Aluno',
+			'userName'=>'Nome do Aluno'
 		);
 	}
 
@@ -87,13 +104,11 @@ class User extends CActiveRecord
 		$criteria=new CDbCriteria;
 
 		$criteria->compare('id',$this->id);
-		$criteria->compare('username',$this->username,true);
-		$criteria->compare('password',$this->password,true);
-		$criteria->compare('email',$this->email,true);
 		$criteria->compare('name',$this->name,true);
-		$criteria->compare('cpf',$this->cpf,true);
-		$criteria->compare('phone',$this->phone,true);
-		$criteria->compare('birth_date',$this->birth_date,true);
+		$criteria->compare('schedule',$this->schedule,true);
+		$criteria->compare('paid',$this->paid);
+		$criteria->compare('notebook',$this->notebook,true);
+		$criteria->compare('tbl_user_id',$this->tbl_user_id);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,
@@ -104,15 +119,10 @@ class User extends CActiveRecord
 	 * Returns the static model of the specified AR class.
 	 * Please note that you should have this exact method in all your CActiveRecord descendants!
 	 * @param string $className active record class name.
-	 * @return User the static model class
+	 * @return Course the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{
 		return parent::model($className);
-	}
-
-	public function beforeSave(){
-		$this->password = sha1($this->password);
-		return parent::beforeSave();
 	}
 }
